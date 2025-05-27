@@ -13,7 +13,7 @@ const Homepage = () => {
         <h1>TUTORLY</h1>
         <h2>Transforma tus clases en herramientas de aprendizaje inteligente</h2>
         <h3>Accede a transcripciones automatizadas, contextualizadas y guías de estudio generadas por IA a partir de tus clases.</h3>
-        <Link to="/dashboard">EMPEZEMOS </Link>
+        <Link to="/file-system">EMPEZEMOS </Link>
       </div>
       <div className="right">
         <div className="imgContainer">

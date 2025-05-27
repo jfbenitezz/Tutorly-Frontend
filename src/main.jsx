@@ -10,7 +10,7 @@ import DashboardLayout from "./layouts/dashboardLayout/DashboardLayout";
 import SignInPage from "./routes/signInPage/signInPage";
 import SignUpPage from "./routes/signUpPage/signUpPage";
 import FileSystemSimulator from "./routes/fileSystemSimulator/FileSystemSimulator";
-import TranscriptPlayer from "./routes/transcriptPlayer/TranscriptPlayer";
+import TranscriptManager from "./routes/transcriptPlayer/TranscriptManager";
 import StudyGuideViewer from "./routes/studyGuideViewer/StudyGuideViewer";
 const router = createBrowserRouter([
   {
@@ -46,7 +46,7 @@ const router = createBrowserRouter([
           },
           {
             path: "/transcript-player*",
-            element: <TranscriptPlayer/>,
+            element: <TranscriptManager/>,
           },
           {
             path: "/study-guide-viewer*",

@@ -33,9 +33,10 @@ const ChatList = () => {
   return (
     <div className="chatList">
       <span className="title">DASHBOARD</span>
-      <Link to="/dashboard">Crea un chat</Link>
+
       <Link to="/file-system">Sube las clases</Link>
       <Link to="/transcript-player">Transcripciones</Link> 
+      <Link to="/dashboard">Crea un chat</Link>
       <Link to="/study-guide-viewer">Guias de estudio</Link> 
       <Link to="/">Explora Tutorly</Link>
       <Link to="/">Contacto</Link>
