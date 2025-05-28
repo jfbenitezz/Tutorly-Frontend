@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import "./dashboardPage.css";
 import { useNavigate } from "react-router-dom";
+const backendUrl = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 const DashboardPage = () => {
   const queryClient = useQueryClient();
@@ -9,7 +10,7 @@ const DashboardPage = () => {
 
   const mutation = useMutation({
     mutationFn: (text) => {
-      return fetch(`http://localhost:3000/api/chats`, {
+      return fetch(`${backendUrl}/api/chats`, {
         method: "POST",
         credentials: "include",
         headers: {

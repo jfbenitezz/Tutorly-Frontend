@@ -7,14 +7,14 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { MdCancel, MdCloudUpload } from 'react-icons/md';
 import "./fileSystemSimulator.css";
 
-const BACKEND_PROXY_URL = "http://localhost:3000";
+const backendUrl = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 // --- Funciones API ---
 const uploadAudio = async (file) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
-    const response = await axios.post(`${BACKEND_PROXY_URL}/api/audio/upload`, formData, {
+    const response = await axios.post(`${backendUrl}/api/audio/upload`, formData, {
       headers: { "Content-Type": "multipart/form-data", },
       withCredentials: true,
     });
@@ -27,7 +27,7 @@ const uploadAudio = async (file) => {
 
 const getAudioStatus = async (audioId) => {
   try {
-    const response = await axios.get(`${BACKEND_PROXY_URL}/api/audio/status/${audioId}`, {
+    const response = await axios.get(`${backendUrl}/api/audio/status/${audioId}`, {
       withCredentials: true,
     });
     return response.data;
@@ -39,7 +39,7 @@ const getAudioStatus = async (audioId) => {
 
 const processAudio = async (audioId, options = {}) => {
   try {
-    const response = await axios.post(`${BACKEND_PROXY_URL}/api/audio/process/${audioId}`, options, {
+    const response = await axios.post(`${backendUrl}/api/audio/process/${audioId}`, options, {
       withCredentials: true,
     });
     return response.data;
@@ -51,7 +51,7 @@ const processAudio = async (audioId, options = {}) => {
 
 const transcribeAudio = async (audioId, options = {}) => {
   // options podría ser, por ejemplo, { use_fallback: true } o { use_fallback: false }
-  let url = `${BACKEND_PROXY_URL}/api/audio/transcribe/${audioId}`;
+  let url = `${backendUrl}/api/audio/transcribe/${audioId}`;
   const queryParams = new URLSearchParams();
   if (options.use_fallback !== undefined) {
     queryParams.append('use_fallback', options.use_fallback);
@@ -71,7 +71,7 @@ const transcribeAudio = async (audioId, options = {}) => {
 
 const cleanupAudio = async (audioId) => {
   try {
-    const response = await axios.delete(`${BACKEND_PROXY_URL}/api/audio/cleanup/${audioId}`, {
+    const response = await axios.delete(`${backendUrl}/api/audio/cleanup/${audioId}`, {
       withCredentials: true,
     });
     return response.data;
@@ -353,7 +353,7 @@ function FileSystemSimulator() {
               <label htmlFor="use-fallback-checkbox" className="fss-fallback-checkbox-label"> {/* Nueva clase para el label */}
                 {/* El texto del label puede o no estar visible dependiendo del diseño final del switch */}
                 <span className="fss-fallback-switch-ui"></span> {/* Elemento para el UI del switch */}
-                Usar IA Avanzada (más lento/costoso) {/* Texto descriptivo */}
+                Usar Modelo alterno{/* Texto descriptivo */}
               </label>
             </div>
 
