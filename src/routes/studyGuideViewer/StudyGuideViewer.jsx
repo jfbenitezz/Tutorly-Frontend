@@ -18,7 +18,7 @@ const StudyGuideViewer = () => {
   }, []);
 
   const loadMarkdown = (filename) => {
-    fetch(`${BASE_URL}/api/files/${filename}`)
+    fetch(`${backendUrl}/api/files/${filename}`)
       .then((res) => res.text())
       .then((content) => {
         setSelectedFile(filename);
