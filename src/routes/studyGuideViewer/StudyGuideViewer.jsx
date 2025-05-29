@@ -40,7 +40,7 @@ const StudyGuideViewer = () => {
   const downloadFile = () => {
     if (!selectedFile) return;
     
-    fetch(`${BASE_URL}/api/files/${selectedFile}`)
+    fetch(`${backendUrl}/api/files/${selectedFile}`)
       .then(res => res.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
