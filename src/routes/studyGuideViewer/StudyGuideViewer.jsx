@@ -62,13 +62,16 @@ const StudyGuideViewer = () => {
 
       <section>
         <h4>Archivos disponibles (.md):</h4>
-        <ul>
+        <select onChange={(e) => loadMarkdown(e.target.value)} defaultValue="">
+          <option value="" disabled>
+            Selecciona un archivo
+          </option>
           {files.map((file) => (
-            <li key={file}>
-              <button onClick={() => loadMarkdown(file)}>{file}</button>
-            </li>
+            <option key={file} value={file}>
+              {file}
+            </option>
           ))}
-        </ul>
+        </select>
       </section>
 
       {selectedFile && (

@@ -1,87 +1,20 @@
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
+// Importa las funciones API desde el nuevo archivo
+import {
+  uploadAudio,
+  getAudioStatus,
+  processAudio,
+  transcribeAudio,
+  cleanupAudio,
+  uploadPdfToVectorDB
+} from "./uploadService"; // Ajusta la ruta según la ubicación de tu archivo api.js
+
 // Importando iconos de React Icons
 import { FiUpload, FiSave, FiRefreshCw, FiAlertTriangle } from 'react-icons/fi';
 import { FaFileAudio, FaFileAlt, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { MdCancel, MdCloudUpload } from 'react-icons/md';
 import "./fileSystemSimulator.css";
-
-const BACKEND_PROXY_URL = "http://localhost:3000";
-
-// --- Funciones API ---
-const uploadAudio = async (file) => {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    const response = await axios.post(`${BACKEND_PROXY_URL}/api/audio/upload`, formData, {
-      headers: { "Content-Type": "multipart/form-data", },
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al subir el audio:", error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
-
-const getAudioStatus = async (audioId) => {
-  try {
-    const response = await axios.get(`${BACKEND_PROXY_URL}/api/audio/status/${audioId}`, {
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener el estado del audio:", error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
-
-const processAudio = async (audioId, options = {}) => {
-  try {
-    const response = await axios.post(`${BACKEND_PROXY_URL}/api/audio/process/${audioId}`, options, {
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al procesar el audio:", error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
-
-const transcribeAudio = async (audioId, options = {}) => {
-  // options podría ser, por ejemplo, { use_fallback: true } o { use_fallback: false }
-  let url = `${BACKEND_PROXY_URL}/api/audio/transcribe/${audioId}`;
-  const queryParams = new URLSearchParams();
-  if (options.use_fallback !== undefined) {
-    queryParams.append('use_fallback', options.use_fallback);
-  }
-  const queryString = queryParams.toString();
-  if (queryString) {
-    url += `?${queryString}`;
-  }
-  try {
-    const response = await axios.post(url, {}, { withCredentials: true, });
-    return response.data;
-  } catch (error) {
-    console.error("Error al transcribir el audio (frontend):", error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
-
-const cleanupAudio = async (audioId) => {
-  try {
-    const response = await axios.delete(`${BACKEND_PROXY_URL}/api/audio/cleanup/${audioId}`, {
-      withCredentials: true,
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al limpiar el audio:", error.response ? error.response.data : error.message);
-    throw error;
-  }
-};
-// --- FIN Funciones API ---
-
 
 function FileSystemSimulator() {
   const audioInputRef = useRef(null);
@@ -90,6 +23,10 @@ function FileSystemSimulator() {
   const [audioFile, setAudioFile] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [audioId, setAudioId] = useState(null);
+
+  // Nuevos estados para la carga de PDF
+  const [isPdfUploading, setIsPdfUploading] = useState(false);
+  const [pdfUploadFeedback, setPdfUploadFeedback] = useState(null); // { type: 'success' | 'error', message: string }
 
   const [currentProcessStatus, setCurrentProcessStatus] = useState(null);
   const [transcriptionData, setTranscriptionData] = useState(null);
@@ -131,16 +68,31 @@ function FileSystemSimulator() {
     }
   };
 
-  const handlePdfFileSelect = (file) => {
-    if (isLoading) return;
+  const handlePdfFileSelect = async (file) => {
+    if (isLoading || isPdfUploading) return;
     setPdfFile(file);
-    alert(`Archivo PDF seleccionado: ${file.name}. La integración de PDF está pendiente.`);
+    setPdfUploadFeedback(null);
+    setIsPdfUploading(true);
+
+    try {
+      const result = await uploadPdfToVectorDB(file);
+      setPdfUploadFeedback({ type: 'success', message: result.message || `"${file.name}" subido con éxito.` });
+      // Opcionalmente, puedes resetear pdfFile aquí si no quieres que permanezca seleccionado después de una subida exitosa
+      setPdfFile(null); 
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message || "Error al subir el PDF.";
+      setPdfUploadFeedback({ type: 'error', message: errorMessage });
+      // Mantener el archivo en el estado para que el usuario pueda verlo, o resetearlo:
+      // setPdfFile(null); 
+    } finally {
+      setIsPdfUploading(false);
+    }
   };
 
   const resetState = (statusMessage = 'idle') => {
     setIsLoading(false);
     setAudioFile(null);
-    setPdfFile(null);
+    setPdfFile(null); // Asegúrate de resetear el PDF también
     setAudioId(null);
     setCurrentProcessStatus(null);
     setTranscriptionData(null);
@@ -151,6 +103,9 @@ function FileSystemSimulator() {
       clearInterval(pollingIntervalId);
       setPollingIntervalId(null);
     }
+    // Resetear estados de PDF
+    setIsPdfUploading(false);
+    setPdfUploadFeedback(null);
   };
 
   const startAudioProcessingFlow = async () => {
@@ -312,13 +267,32 @@ function FileSystemSimulator() {
                 onChange={(e) => e.target.files && e.target.files.length > 0 && handlePdfFileSelect(e.target.files[0])}
                 className="fss-file-input"
                 id="pdf-upload-input"
-                disabled={isLoading}
+                disabled={isLoading || isPdfUploading} // Actualizado
               />
               <label
                 htmlFor="pdf-upload-input"
-                className={`fss-upload-area ${isLoading ? "disabled" : ""} ${pdfFile ? "has-file" : "type-document"}`}
+                className={`fss-upload-area ${isLoading || isPdfUploading ? "disabled" : ""} ${pdfFile || pdfUploadFeedback ? "has-file" : "type-document"} ${pdfUploadFeedback?.type === 'error' ? 'has-error' : ''}`}
               >
-                {pdfFile ? (
+                {isPdfUploading ? (
+                  <>
+                    <AiOutlineLoading3Quarters className="fss-upload-icon-main loading-animate" />
+                    <p className="fss-upload-prompt">Subiendo PDF...</p>
+                    {pdfFile && <p className="fss-upload-filename_small">{pdfFile.name}</p>}
+                  </>
+                ) : pdfUploadFeedback?.type === 'success' ? (
+                  <>
+                    <FaCheckCircle className="fss-upload-icon-status success" />
+                    {pdfFile && <p className="fss-upload-filename">{pdfFile.name}</p>}
+                    <p className="fss-upload-prompt">{pdfUploadFeedback.message}</p>
+                  </>
+                ) : pdfUploadFeedback?.type === 'error' ? (
+                  <>
+                    <FaTimesCircle className="fss-upload-icon-status error" />
+                    {pdfFile && <p className="fss-upload-filename">{pdfFile.name}</p>}
+                    <p className="fss-upload-prompt">Error al subir</p>
+                    <p className="fss-upload-hint fss-error-message">{pdfUploadFeedback.message}</p>
+                  </>
+                ) : pdfFile ? (
                   <>
                     <FaCheckCircle className="fss-upload-icon-status success" />
                     <p className="fss-upload-filename">{pdfFile.name}</p>
