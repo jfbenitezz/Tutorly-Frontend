@@ -5,6 +5,8 @@ import { IKImage } from "imagekitio-react";
 import model from "../../lib/gemini";
 import Markdown from "react-markdown";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+const backendUrl = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
+
 
 const NewPrompt = ({ data }) => {
   const [question, setQuestion] = useState("");
@@ -45,7 +47,7 @@ const chat = model.startChat({
 
   const mutation = useMutation({
     mutationFn: () => {
-      return fetch(`http://localhost:3000/api/chats/${data._id}`, {
+      return fetch(`${backendUrl}/api/chats/${data._id}`, {
         method: "PUT",
         credentials: "include",
         headers: {

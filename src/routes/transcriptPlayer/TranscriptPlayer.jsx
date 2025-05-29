@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { generarEsquema, generarApuntes, generarApuntesGemini } from "./ApuntesService"; // Import ApuntesService functions
 import "./transcriptPlayer.css";
-
-const BACKEND_PROXY_URL = "http://localhost:3000";
-
+const backendUrl = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 const TranscriptPlayer = ({ audioId, originalFilenameFromProps, useFallbackForTranscription }) => {
   const audioRef = useRef(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -23,7 +21,7 @@ const TranscriptPlayer = ({ audioId, originalFilenameFromProps, useFallbackForTr
     setError(null);
 
     try {
-      const response = await fetch(`${BACKEND_PROXY_URL}/api/audio/${audioId}/transcription`, {
+      const response = await fetch(`${backendUrl}/api/audio/${audioId}/transcription`, {
         method: "GET",
         credentials: 'include'
       });

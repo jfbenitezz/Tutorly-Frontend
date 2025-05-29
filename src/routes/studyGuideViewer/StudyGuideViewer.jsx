@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import "./studyGuideViewer.css";
-
-const BASE_URL = "http://localhost:3000";
+const backendUrl = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 const StudyGuideViewer = () => {
   const [files, setFiles] = useState([]);
@@ -10,7 +9,7 @@ const StudyGuideViewer = () => {
   const [fileContent, setFileContent] = useState("");
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/files/`)
+    fetch(`${backendUrl}/api/files/`)
       .then((res) => res.json())
       .then((data) => {
         const markdownFiles = data.filenames.filter((f) => f.endsWith(".md"));

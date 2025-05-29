@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import "./chatList.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+const backendUrl = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 const ChatList = () => {
   const queryClient = useQueryClient();
@@ -8,13 +9,13 @@ const ChatList = () => {
   const { isPending, error, data } = useQuery({
     queryKey: ["userChats"],
     queryFn: () =>
-      fetch(`http://localhost:3000/api/userchats`, {
+      fetch(`${backendUrl}/api/userchats`, {
         credentials: "include",
       }).then((res) => res.json()),
   });
   const deleteMutation = useMutation({
     mutationFn: (id) =>
-      fetch(`http://localhost:3000/api/userchats/${id}`, {
+      fetch(`${backendUrl}/api/userchats/${id}`, {
         method: "DELETE",
         credentials: "include",
       }),

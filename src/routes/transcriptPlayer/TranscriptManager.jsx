@@ -1,7 +1,7 @@
 // TranscriptManager.jsx
 import { useEffect, useState } from "react";
 import TranscriptPlayer from "./TranscriptPlayer";
-const BACKEND_PROXY_URL = "http://localhost:3000";
+const backendUrl = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 const TranscriptManager = () => {
   const [audioList, setAudioList] = useState([]);
@@ -11,7 +11,7 @@ const TranscriptManager = () => {
   useEffect(() => {
     const fetchAudioList = async () => {
       try {
-        const response = await fetch(`${BACKEND_PROXY_URL}/api/audio/list`, {
+        const response = await fetch(`${backendUrl}/api/audio/list`, {
           credentials: 'include'
         });
         const data = await response.json();

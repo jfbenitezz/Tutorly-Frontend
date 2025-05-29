@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import Markdown from "react-markdown";
 import { IKImage } from "imagekitio-react";
+const backendUrl = import.meta.env.VITE_BACKEND || 'http://localhost:3000';
 
 const ChatPage = () => {
   const path = useLocation().pathname;
@@ -12,7 +13,7 @@ const ChatPage = () => {
   const { isPending, error, data } = useQuery({
     queryKey: ["chat", chatId],
     queryFn: () =>
-      fetch(`http://localhost:3000/api/chats/${chatId}`, {
+      fetch(`${backendUrl}/api/chats/${chatId}`, {
         credentials: "include",
       }).then((res) => res.json()),
   });
