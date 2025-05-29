@@ -327,7 +327,7 @@ function FileSystemSimulator() {
               <label htmlFor="use-fallback-checkbox" className="fss-fallback-checkbox-label"> {/* Nueva clase para el label */}
                 {/* El texto del label puede o no estar visible dependiendo del diseño final del switch */}
                 <span className="fss-fallback-switch-ui"></span> {/* Elemento para el UI del switch */}
-                Usar IA Avanzada (más lento/costoso) {/* Texto descriptivo */}
+                Usar IA Avanzada {/* Texto descriptivo */}
               </label>
             </div>
 

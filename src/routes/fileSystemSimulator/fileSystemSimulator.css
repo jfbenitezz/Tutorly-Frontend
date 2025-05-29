@@ -107,12 +107,6 @@
   min-width: 280px; /* Ancho mínimo para que el banner de estado no se comprima demasiado */
 }
 
-.fss-status-title-inline { /* Título opcional para el estado, si quieres que sea menos prominente */
-    /* font-size: 1rem; */
-    /* margin-bottom: 0.75rem; */
-    /* Podrías incluso ocultarlo si el banner es suficiente: display: none; */
-}
-
 
 .fss-actions-buttons-wrapper { /* Nuevo envoltorio solo para los botones */
   display: flex;

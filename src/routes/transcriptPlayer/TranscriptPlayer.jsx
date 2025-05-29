@@ -1,6 +1,9 @@
-import { useEffect, useRef, useState } from "react";  // Make sure useRef is included here
+import { useEffect, useRef, useState } from "react";
+import { generarEsquema, generarApuntes, generarApuntesGemini } from "./ApuntesService"; // Import ApuntesService functions
 import "./transcriptPlayer.css";
+
 const BACKEND_PROXY_URL = "http://localhost:3000";
+
 const TranscriptPlayer = ({ audioId, originalFilenameFromProps, useFallbackForTranscription }) => {
   const audioRef = useRef(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -8,6 +11,9 @@ const TranscriptPlayer = ({ audioId, originalFilenameFromProps, useFallbackForTr
   const [audioTitle, setAudioTitle] = useState("Cargando título...");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [studyGuideMode, setStudyGuideMode] = useState("estandar"); // "estandar" or "gemini"
+  const [isGeneratingStudyGuide, setIsGeneratingStudyGuide] = useState(false);
+  const [studyGuideMessage, setStudyGuideMessage] = useState("");
 
   const fetchTranscription = async () => {
     if (!audioId) return;
@@ -123,6 +129,59 @@ const TranscriptPlayer = ({ audioId, originalFilenameFromProps, useFallbackForTr
         URL.revokeObjectURL(url);
       };
 
+  const handleGenerateStudyGuide = async () => {
+    if (!formattedTranscript || formattedTranscript.length === 0) {
+      alert("No hay transcripción disponible para generar una guía de estudio.");
+      return;
+    }
+
+    setIsGeneratingStudyGuide(true);
+    setStudyGuideMessage("Generando estructura base...");
+    setError(null);
+
+    try {
+      // Paso 1: Generar Esquema
+      const fullText = formattedTranscript.map(line => line.text).join('\n');
+      const transcriptionBlob = new Blob([fullText], { type: "text/plain;charset=utf-8" });
+      const transcriptionFile = new File([transcriptionBlob], `${audioTitle || "transcription"}.txt`, { type: "text/plain;charset=utf-8" });
+
+      const schemaResponse = await generarEsquema(transcriptionFile);
+      if (!schemaResponse.success || !schemaResponse.blob) {
+        throw new Error(schemaResponse.message || "Error al generar el esquema.");
+      }
+
+      const schemaFile = new File([schemaResponse.blob], schemaResponse.filename, { type: "text/plain;charset=utf-8" });
+
+      // Paso 2: Preparar para Generar Apuntes
+      setStudyGuideMessage("Creando apuntes detallados...");
+
+      // Paso 3: Generar Apuntes
+      let notesResponse;
+      if (studyGuideMode === "estandar") {
+        notesResponse = await generarApuntes(transcriptionFile, schemaFile);
+      } else {
+        notesResponse = await generarApuntesGemini(schemaFile, transcriptionFile); // Note: Gemini endpoint might have different param order
+      }
+
+      if (!notesResponse.success) {
+        throw new Error(notesResponse.message || "Error al generar los apuntes.");
+      }
+      
+      // Paso 4: Resultado
+      setStudyGuideMessage("¡Tu guía de estudio está lista!");
+      // The handleFileDownload is already part of generarApuntes/generarApuntesGemini in ApuntesService.js
+      // So the download should be triggered automatically by the service.
+      // alert(`Guía de estudio "${notesResponse.filename}" generada y descargada.`);
+
+    } catch (err) {
+      console.error("[TranscriptPlayer] Error generating study guide:", err);
+      setError(err.message || "Ocurrió un error desconocido al generar la guía de estudio.");
+      setStudyGuideMessage(""); // Clear loading message
+    } finally {
+      setIsGeneratingStudyGuide(false);
+    }
+  };
+
   if (!audioId && !isLoading) {
     return <div className="transcript-player-container"><p className="tp-message">No hay audio seleccionado para transcribir.</p></div>;
   }
@@ -152,6 +211,38 @@ const TranscriptPlayer = ({ audioId, originalFilenameFromProps, useFallbackForTr
           <div className="tp-export-buttons">
             <button onClick={handleCopyToClipboard}>Copiar texto</button>
             <button onClick={handleExportAsTxt}>Exportar como .txt</button>
+          </div>
+
+          {/* UI Elements for Study Guide Generation */}
+          <div className="tp-study-guide-controls">
+            <h4>Generar Guía de Estudio</h4>
+            <div className="tp-mode-selector">
+              <label>
+                <input 
+                  type="radio" 
+                  name="studyGuideMode" 
+                  value="estandar" 
+                  checked={studyGuideMode === "estandar"} 
+                  onChange={() => setStudyGuideMode("estandar")} 
+                />
+                Apuntes Estándar
+              </label>
+              <label>
+                <input 
+                  type="radio" 
+                  name="studyGuideMode" 
+                  value="gemini" 
+                  checked={studyGuideMode === "gemini"} 
+                  onChange={() => setStudyGuideMode("gemini")} 
+                />
+                Apuntes con IA (Gemini)
+              </label>
+            </div>
+            <button onClick={handleGenerateStudyGuide} disabled={isGeneratingStudyGuide}>
+              {isGeneratingStudyGuide ? studyGuideMessage : "Crear Apuntes Detallados"}
+            </button>
+            {isGeneratingStudyGuide && <p className="tp-message">{studyGuideMessage}</p>}
+            {!isGeneratingStudyGuide && studyGuideMessage && <p className="tp-message success">{studyGuideMessage}</p>} {/* Show success message when not loading */}
           </div>
         </>
       )}
