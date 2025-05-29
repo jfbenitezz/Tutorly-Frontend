@@ -134,3 +134,116 @@
 .tp-export-buttons button:hover {
   background-color: #3f6bdd;
 }
+
+/* Styles for Study Guide Generation Section */
+.tp-study-guide-controls {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #4a4658;
+}
+
+.tp-study-guide-controls h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+/* Toggle Switch for Study Guide Mode */
+.tp-mode-toggle-option {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem; /* Space before the main button */
+  padding: 0.6rem 0.8rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid #4a4658;
+  width: fit-content; /* Adjust width to content */
+}
+
+.tp-mode-checkbox-input { /* Hide the native checkbox */
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.tp-mode-toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9rem; 
+  color: #c7c3d7;
+  user-select: none;
+}
+
+.tp-mode-switch-ui { /* The "body" of the switch */
+  position: relative;
+  display: inline-block;
+  width: 44px;  /* Width of the switch */
+  height: 22px; /* Height of the switch */
+  background-color: #524f63; /* Base color (off) */
+  border-radius: 22px; /* Fully rounded */
+  transition: background-color 0.2s ease;
+  margin-right: 12px; /* Space between switch and text */
+}
+
+.tp-mode-switch-ui::after { /* The "slider" of the switch */
+  content: '';
+  position: absolute;
+  width: 18px;  /* Width of the circle */
+  height: 18px; /* Height of the circle */
+  border-radius: 50%; /* Perfect circle */
+  background-color: white;
+  top: 2px;     /* Centered vertically ( (22-18)/2 ) */
+  left: 2px;    /* Initial position (off) */
+  transition: transform 0.2s ease;
+}
+
+/* Styles when the checkbox is checked (toggle on) */
+.tp-mode-checkbox-input:checked + .tp-mode-toggle-label .tp-mode-switch-ui {
+  background-color: #4a7cf6; /* Switch color (on) - primary button color */
+}
+
+.tp-mode-checkbox-input:checked + .tp-mode-toggle-label .tp-mode-switch-ui::after {
+  transform: translateX(22px); /* Move circle to the right (44 - 18 - 2 - 2) */
+}
+
+/* Disabled state for the toggle */
+.tp-mode-checkbox-input:disabled + .tp-mode-toggle-label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.tp-study-guide-controls button {
+  background-color: #788bff; /* Primary button color from fss */
+  color: #ffffff;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 4px 12px -2px rgba(120, 139, 255, 0.3);
+}
+
+.tp-study-guide-controls button:hover:not(:disabled) {
+  background-color: #6a7de8;
+}
+
+.tp-study-guide-controls button:disabled {
+  background-color: #535d8f;
+  color: #9a96ac;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.tp-study-guide-controls .tp-message { /* Messages during/after generation */
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+.tp-study-guide-controls .tp-message.success {
+  color: #34D399; /* Success color from fss */
+  font-weight: 500;
+}

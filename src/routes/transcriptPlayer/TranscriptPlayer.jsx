@@ -214,28 +214,23 @@ const TranscriptPlayer = ({ audioId, originalFilenameFromProps, useFallbackForTr
           {/* UI Elements for Study Guide Generation */}
           <div className="tp-study-guide-controls">
             <h4>Generar Guía de Estudio</h4>
-            <div className="tp-mode-selector">
-              <label>
-                <input 
-                  type="radio" 
-                  name="studyGuideMode" 
-                  value="estandar" 
-                  checked={studyGuideMode === "estandar"} 
-                  onChange={() => setStudyGuideMode("estandar")} 
-                />
-                Apuntes Estándar
-              </label>
-              <label>
-                <input 
-                  type="radio" 
-                  name="studyGuideMode" 
-                  value="gemini" 
-                  checked={studyGuideMode === "gemini"} 
-                  onChange={() => setStudyGuideMode("gemini")} 
-                />
-                Apuntes con IA (Gemini)
+            
+            {/* Toggle Switch for Study Guide Mode */}
+            <div className="tp-mode-toggle-option">
+              <input 
+                type="checkbox" 
+                id="studyGuideModeToggle"
+                className="tp-mode-checkbox-input"
+                checked={studyGuideMode === "gemini"} 
+                onChange={(e) => setStudyGuideMode(e.target.checked ? "gemini" : "estandar")}
+                disabled={isGeneratingStudyGuide}
+              />
+              <label htmlFor="studyGuideModeToggle" className="tp-mode-toggle-label">
+                <span className="tp-mode-switch-ui"></span>
+                <span>{studyGuideMode === "gemini" ? "Apuntes con IA (Gemini)" : "Apuntes Estándar"}</span>
               </label>
             </div>
+
             <button onClick={handleGenerateStudyGuide} disabled={isGeneratingStudyGuide}>
               {isGeneratingStudyGuide ? studyGuideMessage : "Crear Apuntes Detallados"}
             </button>
